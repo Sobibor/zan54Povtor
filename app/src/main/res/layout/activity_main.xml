@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <!-- Верхняя панель инструментов -->
+    <LinearLayout
+        android:id="@+id/topPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <ImageButton
+            android:id="@+id/btnDraw"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:contentDescription="Режим рисования"
+            android:src="@drawable/ic_brush"/>
+
+        <ImageButton
+            android:id="@+id/btnText"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:contentDescription="Режим текста"
+            android:src="@drawable/ic_text"/>
+
+        <ImageButton
+            android:id="@+id/btnClear"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:contentDescription="Очистить холст"
+            android:src="@android:drawable/ic_menu_delete"/>
+
+        <ImageButton
+            android:id="@+id/btnCamera"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Камера"
+            android:src="@drawable/ic_camera"/>
+
+        <ImageButton
+            android:id="@+id/btnSave"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Сохранить"
+            android:src="@drawable/ic_save"/>
+    </LinearLayout>
+
+    <!-- Панель выбора цвета -->
+    <LinearLayout
+        android:id="@+id/colorPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/topPanel"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/btnColorBlack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/btn_color_background"
+            android:backgroundTint="#FF000000"
+            android:contentDescription="Черный цвет"
+            android:padding="4dp"/>
+
+        <ImageButton
+            android:id="@+id/btnColorRed"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/btn_color_background"
+            android:backgroundTint="#FFFF0000"
+            android:contentDescription="Красный цвет"
+            android:padding="4dp"/>
+
+        <ImageButton
+            android:id="@+id/btnColorBlue"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/btn_color_background"
+            android:backgroundTint="#FF0000FF"
+            android:contentDescription="Синий цвет"
+            android:padding="4dp"/>
+
+        <ImageButton
+            android:id="@+id/btnColorGreen"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/btn_color_background"
+            android:backgroundTint="#FF00FF00"
+            android:contentDescription="Зеленый цвет"
+            android:padding="4dp"/>
+    </LinearLayout>
+
+    <!-- Область рисования -->
+    <com.example.zan54povtor.PaintArea
+        android:id="@+id/paintArea"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/colorPanel"
+        android:background="@android:color/white"/>
+
+    <!-- Окно ввода текста -->
+    <LinearLayout
+        android:id="@+id/textInputContainer"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/edittext_border"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/floatingEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Введите текст"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:onClick="onTextDoneClick"
+            android:text="Готово"/>
+    </LinearLayout>
+</RelativeLayout>
