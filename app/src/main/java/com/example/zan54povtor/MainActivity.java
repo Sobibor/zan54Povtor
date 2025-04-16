@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
     private PaintArea paintArea;
     private LinearLayout textInputContainer;
+    private LinearLayout colorPanel;
     private EditText floatingEditText;
     private static final int CAMERA_REQUEST = 100;
     private static final int STORAGE_REQUEST = 101;
@@ -43,15 +45,49 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Инициализация элементов интерфейса
         textInputContainer = findViewById(R.id.textInputContainer);
         floatingEditText = findViewById(R.id.floatingEditText);
         paintArea = findViewById(R.id.paintArea);
+        colorPanel = findViewById(R.id.colorPanel);
 
+        // Настройка кнопок
         initButtons();
         initCameraButton();
         initSaveButton();
+        initColorButtons();
+        setupLongClickListeners();
     }
 
+    // Настройка долгого нажатия для панели цветов
+    private void setupLongClickListeners() {
+        ImageButton btnDraw = findViewById(R.id.btnDraw);
+        btnDraw.setOnLongClickListener(v -> {
+            colorPanel.setVisibility(colorPanel.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+            return true;
+        });
+    }
+
+    // Инициализация кнопок выбора цвета
+    private void initColorButtons() {
+        ImageButton btnBlack = findViewById(R.id.btnColorBlack);
+        ImageButton btnRed = findViewById(R.id.btnColorRed);
+        ImageButton btnBlue = findViewById(R.id.btnColorBlue);
+        ImageButton btnGreen = findViewById(R.id.btnColorGreen);
+
+        btnBlack.setOnClickListener(v -> updatePaintColor(Color.BLACK));
+        btnRed.setOnClickListener(v -> updatePaintColor(Color.RED));
+        btnBlue.setOnClickListener(v -> updatePaintColor(Color.BLUE));
+        btnGreen.setOnClickListener(v -> updatePaintColor(Color.GREEN));
+    }
+
+    // Обновление цвета кисти
+    private void updatePaintColor(int color) {
+        paintArea.setPaintColor(color);
+        colorPanel.setVisibility(View.GONE);
+    }
+
+    // Инициализация основных кнопок
     private void initButtons() {
         ImageButton btnDraw = findViewById(R.id.btnDraw);
         ImageButton btnText = findViewById(R.id.btnText);
@@ -59,18 +95,24 @@ public class MainActivity extends AppCompatActivity {
 
         btnDraw.setOnClickListener(v -> {
             textInputContainer.setVisibility(View.GONE);
+            colorPanel.setVisibility(View.GONE);
             hideKeyboard();
         });
 
         btnText.setOnClickListener(v -> {
             textInputContainer.setVisibility(View.VISIBLE);
+            colorPanel.setVisibility(View.GONE);
             floatingEditText.requestFocus();
             showKeyboard();
         });
 
-        btnClear.setOnClickListener(v -> paintArea.clearCanvas());
+        btnClear.setOnClickListener(v -> {
+            paintArea.clearCanvas();
+            colorPanel.setVisibility(View.GONE);
+        });
     }
 
+    // Работа с камерой
     private void initCameraButton() {
         ImageButton btnCamera = findViewById(R.id.btnCamera);
         btnCamera.setOnClickListener(v -> {
@@ -82,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Сохранение рисунка
     private void initSaveButton() {
         ImageButton btnSave = findViewById(R.id.btnSave);
         btnSave.setOnClickListener(v -> {
@@ -103,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Создание Intent для камеры
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -115,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Создание файла для фото
     private File createImageFile() {
         try {
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -129,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Обработка результата фото
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -145,58 +191,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Сохранение рисунка в галерею
     private void saveDrawing() {
         if (paintArea.getWidth() == 0 || paintArea.getHeight() == 0) {
             Toast.makeText(this, "Холст пуст!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Создаем Bitmap вручную
-        Bitmap bitmap = Bitmap.createBitmap(
-                paintArea.getWidth(),
-                paintArea.getHeight(),
-                Bitmap.Config.ARGB_8888
-        );
+        Bitmap bitmap = Bitmap.createBitmap(paintArea.getWidth(), paintArea.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         paintArea.draw(canvas);
 
-        // Путь для сохранения
-        File picturesDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES
-        );
+        File picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         String fileName = "Sketch_" + System.currentTimeMillis() + ".png";
         File file = new File(picturesDir, fileName);
 
         try {
-            // Проверяем и создаем директорию
             if (!picturesDir.exists()) picturesDir.mkdirs();
-
             try (FileOutputStream fos = new FileOutputStream(file)) {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                Toast.makeText(
-                        this,
-                        "Сохранено в: " + file.getAbsolutePath(),
-                        Toast.LENGTH_LONG
-                ).show();
-
-                // Обновляем галерею
-                MediaScannerConnection.scanFile(
-                        this,
-                        new String[]{file.toString()},
-                        null,
-                        null
-                );
+                Toast.makeText(this, "Сохранено в: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                MediaScannerConnection.scanFile(this, new String[]{file.toString()}, null, null);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(
-                    this,
-                    "Ошибка: " + e.getMessage(),
-                    Toast.LENGTH_LONG
-            ).show();
+            Toast.makeText(this, "Ошибка: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
+    // Обработка текста
     public void onTextDoneClick(View view) {
         String text = floatingEditText.getText().toString().trim();
         if (!text.isEmpty()) {
@@ -209,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
         hideKeyboard();
     }
 
+    // Управление клавиатурой
     private void showKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         imm.showSoftInput(floatingEditText, InputMethodManager.SHOW_IMPLICIT);

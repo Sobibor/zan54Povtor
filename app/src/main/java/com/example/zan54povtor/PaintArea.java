@@ -28,6 +28,11 @@ public class PaintArea extends View {
         setDrawingCacheEnabled(true);
     }
 
+    public void setPaintColor(int color) {
+        drawPaint.setColor(color);
+        invalidate(); // Обновляем холст
+    }
+
     private void setupPaints() {
         drawPaint.setColor(Color.BLACK);
         drawPaint.setStrokeWidth(12f);
